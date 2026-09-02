@@ -22,7 +22,6 @@ def driver(request):
     if not password:
         pytest.fail("Переменная PASSWORD не передана")
 
-
     encoded_login = quote(login, safe="")
     encoded_password = quote(password, safe="")
 
