@@ -1,0 +1,26 @@
+# Кеш Python
+__pycache__/
+*.py[cod]
+
+# Виртуальное окружение
+venv/
+.venv/
+env/
+
+# Кеш pytest
+.pytest_cache/
+
+# Отчёты о покрытии
+.coverage
+htmlcov/
+
+# Настройки IDE
+.idea/
+.vscode/
+
+# Переменные окружения
+.env
+
+# Системные файлы
+.DS_Store
+Thumbs.db
