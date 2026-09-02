@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+from utils import attach
+
 load_dotenv()
 
 
@@ -20,21 +22,22 @@ def driver(request):
     if not password:
         pytest.fail("Переменная PASSWORD не передана")
 
-    # Нужно, если в логине или пароле есть специальные символы.
+
     encoded_login = quote(login, safe="")
     encoded_password = quote(password, safe="")
 
     options = Options()
     options.add_argument("--window-size=1920,1080")
 
-    options.set_capability(
-        "selenoid:options",
-        {
+    selenoid_capabilities = {
+        "browserName": "chrome",
+        "browserVersion": "148.0",
+        "selenoid:options": {
             "enableVNC": True,
-            "enableVideo": True,
-            "name": request.node.name,
-        },
-    )
+            "enableVideo": True
+        }
+    }
+    options.capabilities.update(selenoid_capabilities)
 
     driver = webdriver.Remote(
         command_executor=(
@@ -44,9 +47,11 @@ def driver(request):
         options=options,
     )
 
-    print(f"\nRemote session ID: {driver.session_id}")
+    yield driver
 
-    try:
-        yield driver
-    finally:
-        driver.quit()
+    attach.add_screenshot(driver)
+    attach.add_html(driver)
+    attach.add_logs(driver)
+    attach.add_video(driver)
+
+    driver.quit()
