@@ -1,35 +1,52 @@
 import os
+from urllib.parse import quote
 
 import pytest
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-
 load_dotenv()
 
 
-@pytest.fixture()
-def driver():
+@pytest.fixture(scope="function")
+def driver(request):
     login = os.getenv("LOGIN")
     password = os.getenv("PASSWORD")
 
-    if not login or not password:
-        pytest.fail("Проверь LOGIN и PASSWORD в файле .env")
+    if not login:
+        pytest.fail("Переменная LOGIN не передана")
+
+    if not password:
+        pytest.fail("Переменная PASSWORD не передана")
+
+    # Нужно, если в логине или пароле есть специальные символы.
+    encoded_login = quote(login, safe="")
+    encoded_password = quote(password, safe="")
 
     options = Options()
     options.add_argument("--window-size=1920,1080")
 
+    options.set_capability(
+        "selenoid:options",
+        {
+            "enableVNC": True,
+            "enableVideo": True,
+            "name": request.node.name,
+        },
+    )
+
     driver = webdriver.Remote(
         command_executor=(
-            f"https://{login}:{password}"
+            f"https://{encoded_login}:{encoded_password}"
             "@selenoid.qa.guru/wd/hub"
         ),
         options=options,
     )
 
-    print("\nRemote session ID:", driver.session_id)
+    print(f"\nRemote session ID: {driver.session_id}")
 
-    yield driver
-
-    driver.quit()
+    try:
+        yield driver
+    finally:
+        driver.quit()
