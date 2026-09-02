@@ -1,23 +1,35 @@
+import os
+
 import pytest
+from dotenv import load_dotenv
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+
+load_dotenv()
 
 
 @pytest.fixture()
 def driver():
-    chrome_options = webdriver.ChromeOptions()
+    login = os.getenv("LOGIN")
+    password = os.getenv("PASSWORD")
 
-    HEADLESS_MODE = True
+    if not login or not password:
+        pytest.fail("Проверь LOGIN и PASSWORD в файле .env")
 
-    if HEADLESS_MODE:
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--window-size=1920,1080")
+    options = Options()
+    options.add_argument("--window-size=1920,1080")
 
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Remote(
+        command_executor=(
+            f"https://{login}:{password}"
+            "@selenoid.qa.guru/wd/hub"
+        ),
+        options=options,
+    )
 
-    if not HEADLESS_MODE:
-        driver.maximize_window()
+    print("\nRemote session ID:", driver.session_id)
 
-    driver.implicitly_wait(5)
     yield driver
+
     driver.quit()
