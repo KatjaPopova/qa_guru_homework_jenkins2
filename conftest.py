@@ -9,7 +9,6 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 from utils import attach
 
-
 load_dotenv()
 
 
