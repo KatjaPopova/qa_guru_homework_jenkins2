@@ -18,6 +18,8 @@ class StudentRegistrationPage:
     # ЛОКАТОРЫ
     # =========================
 
+    URL = "https://qa-guru.github.io/one-page-form/automation-practice-form.html"
+
     FIRST_NAME = (By.ID, "firstName")
     LAST_NAME = (By.ID, "lastName")
     EMAIL = (By.ID, "userEmail")
@@ -49,7 +51,7 @@ class StudentRegistrationPage:
     # =========================
     @allure.step("Открыть страницу регистрации студента")
     def open(self):
-        self.driver.get(self.driver.base_url)
+        self.driver.get(self.URL)
         return self
 
     @allure.step("Удалить элементы, перекрывающие форму")
